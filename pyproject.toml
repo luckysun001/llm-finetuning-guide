@@ -5,7 +5,7 @@ description = "大模型微调开源学习项目 - 从入门到精通"
 authors = ["AI Learning Lab"]
 license = "MIT"
 readme = "README.md"
-repository = "https://github.com/opensource-ai-projects/llm-finetuning-guide"
+repository = "https://github.com/luckysun001/llm-finetuning-guide"
 keywords = ["llm", "fine-tuning", "machine-learning", "nlp", "deep-learning", "lora", "qlora"]
 classifiers = [
     "Development Status :: 4 - Beta",
