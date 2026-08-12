@@ -99,9 +99,46 @@ def cmd_eval(args):
     """评估模型"""
     print(f"🔍 评估模型: {args.model_path}")
     print(f"   数据集: {args.dataset}")
-    # TODO: 实现模型评估逻辑
-    # 需要加载模型、加载数据集、运行推理、计算指标
-    print("   ⚠️ 此功能尚未实现 (TODO)")
+
+    try:
+        from llm_finetuning import Config, FinetuningEngine, FinetuningMethod
+    except ImportError as e:
+        print(f"❌ 导入失败: {e}")
+        sys.exit(1)
+
+    # 判断传入的数据集是 HuggingFace 名称还是本地文件路径
+    is_local = os.path.exists(args.dataset) or args.dataset.endswith(
+        (".json", ".jsonl", ".csv")
+    )
+    dataset_name = None if is_local else args.dataset
+    dataset_path = args.dataset if is_local else None
+
+    # 用 FULL 方法加载模型：避免对完整模型误套 LoRA 适配器
+    config = Config(
+        model_name_or_path=args.model_path,
+        finetuning_method=FinetuningMethod.FULL,
+        output_dir=os.path.join(args.model_path, "eval_output"),
+    )
+    engine = FinetuningEngine(config)
+
+    print(f"\n📦 加载评估数据集: {args.dataset}")
+    _, eval_dataset = engine.load_data(
+        dataset_name=dataset_name,
+        dataset_path=dataset_path,
+    )
+
+    print("\n🚀 开始评估...")
+    result = engine.evaluate(eval_dataset)
+
+    print("\n✅ 评估完成！")
+    if result.perplexity is not None:
+        print(f"   困惑度 (Perplexity): {result.perplexity:.2f}")
+    if result.bleu_score is not None:
+        print(f"   BLEU: {result.bleu_score:.4f}")
+    if result.accuracy is not None:
+        print(f"   准确率 (Accuracy): {result.accuracy:.2%}")
+    result_path = os.path.join(config.training.output_dir, "evaluation_results.json")
+    print(f"   详细结果已保存: {result_path}")
 
 
 def cmd_merge(args):
@@ -109,9 +146,50 @@ def cmd_merge(args):
     print(f"🔄 合并模型适配器")
     print(f"   适配器路径: {args.adapter}")
     print(f"   输出路径: {args.output}")
-    # TODO: 实现 LoRA 适配器合并逻辑
-    # 需要加载基础模型、加载适配器、合并权重、保存模型
-    print("   ⚠️ 此功能尚未实现 (TODO)")
+
+    try:
+        import json
+        import torch
+        from transformers import AutoModelForCausalLM, AutoTokenizer
+        from peft import PeftModel
+    except ImportError as e:
+        print(f"❌ 缺少依赖 (torch/transformers/peft): {e}")
+        print("   请执行: pip install torch transformers peft")
+        sys.exit(1)
+
+    # 解析基础模型：优先用显式指定的，否则从适配器的 adapter_config.json 读取
+    base_model = args.base_model
+    if not base_model:
+        adapter_cfg = os.path.join(args.adapter, "adapter_config.json")
+        if os.path.exists(adapter_cfg):
+            with open(adapter_cfg, "r", encoding="utf-8") as f:
+                cfg = json.load(f)
+            base_model = cfg.get("base_model_name_or_model_path")
+        if not base_model:
+            print("❌ 未指定 --base-model，且适配器目录中找不到 base_model_name_or_model_path")
+            sys.exit(1)
+
+    print(f"   基础模型: {base_model}")
+
+    # 加载基础模型与分词器
+    base = AutoModelForCausalLM.from_pretrained(
+        base_model,
+        torch_dtype=torch.float16,
+        device_map="auto",
+    )
+    tokenizer = AutoTokenizer.from_pretrained(base_model)
+
+    # 挂载 LoRA 适配器并合并权重
+    model = PeftModel.from_pretrained(base, args.adapter)
+    print("🔗 已挂载 LoRA 适配器，开始合并权重...")
+    model = model.merge_and_unload()
+
+    # 保存合并后的完整模型
+    os.makedirs(args.output, exist_ok=True)
+    model.save_pretrained(args.output)
+    tokenizer.save_pretrained(args.output)
+
+    print(f"✅ 合并完成，完整模型已保存到: {args.output}")
 
 
 def main():
