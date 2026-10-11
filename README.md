@@ -8,7 +8,7 @@
 <p>
 <a href="https://github.com/luckysun001/llm-finetuning-guide/actions/workflows/ci.yml"><img src="https://github.com/luckysun001/llm-finetuning-guide/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
 <a href="#"><img src="https://img.shields.io/badge/Status-Beta-F97316?style=for-the-badge" alt="Status"></a>
-<a href="#"><img src="https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python"></a>
+<a href="#"><img src="https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python"></a>
 <a href="#"><img src="https://img.shields.io/badge/PyTorch-2.0+-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white" alt="PyTorch"></a>
 </p>
 
@@ -124,7 +124,7 @@ llm-finetuning-guide/
 ### 环境准备
 
 ```bash
-# 推荐使用 Python 3.10+
+# 推荐使用 Python 3.11+
 python --version
 
 # 安装依赖（需要 Poetry）
