@@ -6,6 +6,7 @@
 数据准备 · LoRA/QLoRA · 模型训练 · 评估
 
 <p>
+<a href="https://github.com/luckysun001/llm-finetuning-guide/actions/workflows/ci.yml"><img src="https://github.com/luckysun001/llm-finetuning-guide/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
 <a href="#"><img src="https://img.shields.io/badge/Status-Beta-F97316?style=for-the-badge" alt="Status"></a>
 <a href="#"><img src="https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python"></a>
 <a href="#"><img src="https://img.shields.io/badge/PyTorch-2.0+-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white" alt="PyTorch"></a>
@@ -110,7 +111,8 @@ llm-finetuning-guide/
 └── tests/                      # 单元测试
     ├── __init__.py
     ├── test_config.py          # 配置序列化测试
-    └── test_data.py            # 数据处理测试
+    ├── test_data.py            # 数据加载测试
+    └── test_processor.py       # 数据处理器测试
 ```
 
 > **注意**：README 之前版本声称的 `trainers/`（5 个文件）、`export/`、`deploy/`、`configs/`、`datasets/`、`notebooks/`、`quickstart.py`、`requirements.txt`、`.env.example`、`assets/` 等目录和文件均不存在。实际功能以本文件结构为准。
@@ -211,6 +213,19 @@ pytest tests/ -v
 - 不要只看困惑度，一定要人工抽样检查
 - 保留 10% 数据做 hold-out 测试集
 - A/B 测试是黄金标准
+
+---
+
+## 🔗 相关项目
+
+本仓库讲「**怎么把模型训出来**」。
+
+如果你更关心「**不训练也能把大模型用起来**」，推荐作者的另一个开源项目：
+
+> ### 📚 [开源 AI 实战指南（ai-education）](https://github.com/luckysun001/ai-education)
+> 覆盖 8 大行业 + 7 大职业 + 无代码实战，全部是可直接复制使用的 Prompt 模板与工具选型建议。
+
+想先把原理和代码搞懂，另见 [AI-Learning-Playground](https://github.com/luckysun001/AI-Learning-Playground)。
 
 ---
 
