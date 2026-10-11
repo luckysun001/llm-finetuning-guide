@@ -51,6 +51,35 @@ from llm_finetuning.data.processor import (
     create_sample_instruction_dataset,
 )
 
+# 数据清洗
+from llm_finetuning.data.cleaner import (
+    DataCleaner,
+    CleanReport,
+    deduplicate,
+    length_stats,
+)
+
+# 模型导出
+from llm_finetuning.export.exporter import (
+    ExportConfig,
+    ExportFormat,
+    ExportResult,
+    ModelExporter,
+)
+
+# 模型部署
+from llm_finetuning.deploy.server import (
+    DeployConfig,
+    GenerationRequest,
+    GenerationResponse,
+    InferenceBackend,
+    TransformersBackend,
+    VLLMBackend,
+    build_backend,
+    create_app,
+    run_server,
+)
+
 # 评估
 from llm_finetuning.evaluation.evaluator import (
     ModelEvaluator,
@@ -89,6 +118,26 @@ __all__ = [
     "DataPreprocessor",
     "DatasetSplitter",
     "create_sample_instruction_dataset",
+    # 数据清洗
+    "DataCleaner",
+    "CleanReport",
+    "deduplicate",
+    "length_stats",
+    # 模型导出
+    "ExportConfig",
+    "ExportFormat",
+    "ExportResult",
+    "ModelExporter",
+    # 模型部署
+    "DeployConfig",
+    "GenerationRequest",
+    "GenerationResponse",
+    "InferenceBackend",
+    "TransformersBackend",
+    "VLLMBackend",
+    "build_backend",
+    "create_app",
+    "run_server",
     # 评估
     "ModelEvaluator",
     "EvaluationResult",

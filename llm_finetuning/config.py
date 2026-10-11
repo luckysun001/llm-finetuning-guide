@@ -213,6 +213,18 @@ class Config:
                 if hasattr(config.data, k):
                     setattr(config.data, k, v)
 
+        # 更新评估配置
+        if "evaluation" in config_dict:
+            for k, v in config_dict["evaluation"].items():
+                if hasattr(config.evaluation, k):
+                    setattr(config.evaluation, k, v)
+
+        # 更新 LoRA / QLoRA 配置（仅在该方法下存在 lora_config 时生效）
+        if "lora" in config_dict and hasattr(config, "lora_config"):
+            for k, v in config_dict["lora"].items():
+                if hasattr(config.lora_config, k):
+                    setattr(config.lora_config, k, v)
+
         return config
 
     def __repr__(self) -> str:
