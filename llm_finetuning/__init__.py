@@ -32,6 +32,8 @@ from llm_finetuning.config import (
     ModelType,
     LoRAConfig,
     QLoRAConfig,
+    AdaLoRAConfig,
+    IA3Config,
     TrainingConfig,
     DataConfig,
     EvaluationConfig,
@@ -41,6 +43,13 @@ from llm_finetuning.config import (
 from llm_finetuning.methods.lora import (
     LoRAFinetuner,
     QLoRAFinetuner,
+)
+
+# PEFT 适配器工厂（AdaLoRA / IA³）
+from llm_finetuning.methods.adapters import (
+    build_peft_config,
+    build_peft_config_dict,
+    get_method_defaults,
 )
 
 # 数据处理
@@ -92,6 +101,17 @@ from llm_finetuning.visualization.plotter import (
     TrainingVisualizer,
 )
 
+# 超参数搜索
+from llm_finetuning.tuning import (
+    Parameter,
+    SearchSpace,
+    HyperparameterSearcher,
+    SearchResult,
+    Trial,
+    apply_params,
+    default_lora_space,
+)
+
 # 训练引擎
 from llm_finetuning.engine import (
     FinetuningEngine,
@@ -107,12 +127,17 @@ __all__ = [
     "ModelType",
     "LoRAConfig",
     "QLoRAConfig",
+    "AdaLoRAConfig",
+    "IA3Config",
     "TrainingConfig",
     "DataConfig",
     "EvaluationConfig",
     # 微调方法
     "LoRAFinetuner",
     "QLoRAFinetuner",
+    "build_peft_config",
+    "build_peft_config_dict",
+    "get_method_defaults",
     # 数据处理
     "DatasetLoader",
     "DataPreprocessor",
@@ -144,6 +169,14 @@ __all__ = [
     "ComparisonEvaluator",
     # 可视化
     "TrainingVisualizer",
+    # 超参数搜索
+    "Parameter",
+    "SearchSpace",
+    "HyperparameterSearcher",
+    "SearchResult",
+    "Trial",
+    "apply_params",
+    "default_lora_space",
     # 引擎
     "FinetuningEngine",
     "TrainingCallback",

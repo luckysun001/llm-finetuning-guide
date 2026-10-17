@@ -68,6 +68,9 @@ visualizations/
 *.png
 *.html
 
+# 示例脚本输出（超参搜索结果等）
+outputs/
+
 # WorkBuddy local data
 .workbuddy/
 .pytest_cache/

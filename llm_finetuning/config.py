@@ -61,6 +61,63 @@ class QLoRAConfig(LoRAConfig):
 
 
 @dataclass
+class AdaLoRAConfig(LoRAConfig):
+    """AdaLoRA 配置（自适应秩分配）
+
+    训练过程中动态裁剪不重要的奇异值，把参数预算分配给更需要的层，
+    因此需要额外的「总秩预算」与「调度节奏」参数。
+    """
+    target_r: int = 8           # 最终保留的平均秩（参数预算）
+    init_r: int = 12            # 初始秩，训练中逐步裁剪到 target_r
+    tinit: int = 0              # 前多少步只 warmup 不裁剪
+    tfinal: int = 0             # 第多少步停止裁剪
+    deltaT: int = 1             # 每隔多少步裁剪一次
+    orth_reg_weight: float = 0.5  # 正交正则权重，过大会限制表达能力
+    total_step: Optional[int] = None  # 训练总步数，用于自动推导 tinit / tfinal
+
+    def __post_init__(self):
+        # AdaLoRA 的 r 语义为初始秩，保持与 LoRA 字段兼容
+        self.r = self.init_r
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "r": self.r,
+            "init_r": self.init_r,
+            "target_r": self.target_r,
+            "lora_alpha": self.lora_alpha,
+            "target_modules": list(self.target_modules),
+            "lora_dropout": self.lora_dropout,
+            "bias": self.bias,
+            "task_type": self.task_type,
+            "tinit": self.tinit,
+            "tfinal": self.tfinal,
+            "deltaT": self.deltaT,
+            "orth_reg_weight": self.orth_reg_weight,
+            "total_step": self.total_step,
+        }
+
+
+@dataclass
+class IA3Config(LoRAConfig):
+    """IA³ 配置（Infused Adapter by Inhibiting and Amplifying Inner Activations）
+
+    不学习低秩矩阵，而是学习逐通道缩放向量，可训练参数量约为 LoRA 的十分之一。
+    """
+    feedforward_modules: List[str] = field(
+        default_factory=lambda: ["down_proj"]
+    )
+    modules_to_save: Optional[List[str]] = None
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "target_modules": list(self.target_modules),
+            "feedforward_modules": list(self.feedforward_modules),
+            "modules_to_save": list(self.modules_to_save) if self.modules_to_save else None,
+            "task_type": self.task_type,
+        }
+
+
+@dataclass
 class TrainingConfig:
     """训练配置"""
     # 基础训练参数
@@ -163,6 +220,22 @@ class Config:
             self.quantization_level = QuantizationLevel.INT4
             self.training.learning_rate = 2e-4
             self.training.bf16 = True
+
+        elif self.finetuning_method == FinetuningMethod.ADALORA:
+            self.lora_config = AdaLoRAConfig(
+                target_modules=[
+                    "q_proj", "k_proj", "v_proj", "o_proj",
+                    "gate_proj", "up_proj", "down_proj",
+                ]
+            )
+            self.training.learning_rate = 3e-4
+
+        elif self.finetuning_method == FinetuningMethod.IA3:
+            self.lora_config = IA3Config(
+                target_modules=["q_proj", "v_proj", "down_proj"],
+                feedforward_modules=["down_proj"],
+            )
+            self.training.learning_rate = 3e-3
 
         elif self.finetuning_method == FinetuningMethod.FULL:
             self.training.learning_rate = 5e-6

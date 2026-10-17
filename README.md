@@ -44,8 +44,20 @@
 | **LoRA** | ✅ 已实现 | ~15% 全参 | 低秩适配，通用场景首选 |
 | **QLoRA** | ✅ 已实现 | ~5% 全参 | 4-bit 量化 + LoRA，显存受限场景 |
 | **全参指令微调** | ✅ 已实现 | 100% | 全参数微调示例 |
-| **AdaLoRA** | 🔲 TODO | ~10% 全参 | 自适应秩分配 |
-| **IA³** | 🔲 TODO | ~1% 全参 | 极快轻量微调 |
+| **AdaLoRA** | ✅ 配置已支持 | ~10% 全参 | 自适应秩分配（训练中动态裁剪奇异值） |
+| **IA³** | ✅ 配置已支持 | ~1% 全参 | 逐通道缩放向量，极轻量 |
+
+AdaLoRA / IA³ 由 `methods/adapters.py` 生成对应的 PEFT 配置（`AdaLoraConfig` / `IA3Config`），
+可直接在 `LoRAFinetuner` 中复用：
+
+```python
+from llm_finetuning import Config, FinetuningMethod, build_peft_config_dict
+
+config = Config("Qwen/Qwen2.5-7B-Instruct", finetuning_method=FinetuningMethod.ADALORA)
+print(build_peft_config_dict(config))   # 不装 peft 也能查看配置字典
+```
+
+> 两者只有配置工厂，没有独立的 Trainer 子类——`peft` 的 `get_peft_model` 对这两种配置同样适用。
 
 ### 📊 评估体系
 
@@ -73,12 +85,32 @@
 - 空样本与缺字段剔除、全角/空白归一化、精确去重与模糊去重（忽略标点差异）
 - 长度过滤与分布统计，输出可读的清洗报告
 
+### 🔍 超参数搜索（`tuning/`）
+
+不引入 optuna / ray，纯标准库实现 **网格搜索与随机搜索**：
+
+- 参数空间支持 `categorical` / `uniform` / `loguniform` / `int` / `int_log` 五种类型，
+  学习率这类跨数量级的参数用对数区间采样更有效
+- 目标函数由调用方提供（`objective(params) -> float`），因此既能接真实训练，
+  也能接任何代理指标——这让搜索模块在没有 GPU 的 CI 中也能被完整测试
+- 单次试验失败会被记录并继续（不中断整轮搜索），结果可导出 CSV / JSON
+- `apply_params()` 把最优参数写回 `Config`，支持 `lora.r` 这类点号路径
+- **网格搜索在预算不足时做均匀抽样**，而不是按字典序截断——后者会把后面的维度锁死在首个取值上
+- 组合数超过 20000 时自动退化为不重复随机采样，避免笛卡尔积爆炸
+
+```python
+from llm_finetuning.tuning import HyperparameterSearcher, default_lora_space, apply_params
+
+searcher = HyperparameterSearcher(default_lora_space(), objective, direction="minimize", seed=42)
+result = searcher.random_search(n_trials=20)
+apply_params(config, result.best_params)
+```
+
+完整示例见 [`examples/04_hyperparameter_search.py`](examples/04_hyperparameter_search.py)。
+
 ### 📦 待实现功能
 
-以下功能尚未实现：
-
-- ~~Jupyter 教程 notebooks~~ → TODO
-- ~~超参数搜索~~ → TODO
+- **Jupyter 教程 notebooks** 尚未提供（其余曾标注 TODO 的能力均已实现）
 
 ---
 
@@ -104,7 +136,13 @@ llm-finetuning-guide/
 │   │
 │   ├── methods/                # 微调方法
 │   │   ├── __init__.py
-│   │   └── lora.py             # LoRA/QLoRA 配置生成
+│   │   ├── lora.py             # LoRA/QLoRA 训练器
+│   │   └── adapters.py         # PEFT 配置工厂（LoRA/QLoRA/AdaLoRA/IA³）
+│   │
+│   ├── tuning/                 # 超参数搜索（纯标准库）
+│   │   ├── __init__.py
+│   │   ├── search_space.py     # 参数空间（5 种参数类型）
+│   │   └── searcher.py         # 网格/随机搜索 + 结果导出
 │   │
 │   ├── export/                 # 模型导出
 │   │   ├── __init__.py
@@ -135,7 +173,8 @@ llm-finetuning-guide/
 ├── examples/                   # 示例代码
 │   ├── 01_lora_basics.py       # LoRA 基础微调
 │   ├── 02_qlora_advanced.py    # QLoRA 进阶微调
-│   └── 03_full_instruction_tuning.py  # 全参指令微调
+│   ├── 03_full_instruction_tuning.py  # 全参指令微调
+│   └── 04_hyperparameter_search.py    # 超参数搜索
 │
 ├── scripts/                    # 命令行工具
 │   ├── cli.py                  # 训练/评估/合并 CLI 入口
@@ -148,7 +187,9 @@ llm-finetuning-guide/
     ├── test_processor.py       # 数据处理器测试
     ├── test_cleaner.py         # 数据清洗与去重测试
     ├── test_export.py          # 模型导出测试
-    └── test_deploy.py          # 部署服务测试
+    ├── test_deploy.py          # 部署服务测试
+    ├── test_adapters.py        # AdaLoRA / IA³ 配置测试
+    └── test_tuning.py          # 超参数搜索测试
 ```
 
 > **注意**：README 之前版本声称的 `trainers/`（5 个文件）、`notebooks/`、`quickstart.py`、`requirements.txt`、`.env.example`、`assets/` 等目录和文件均不存在。实际功能以本文件结构为准。
