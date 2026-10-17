@@ -29,6 +29,8 @@ ENV/
 # Jupyter Notebook
 .ipynb_checkpoints
 *.ipynb
+# 但 notebooks/ 下的教程需要入库（临时实验用的 notebook 仍然忽略）
+!notebooks/*.ipynb
 
 # IDE
 .vscode/

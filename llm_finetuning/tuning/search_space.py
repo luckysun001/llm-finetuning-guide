@@ -144,6 +144,65 @@ class SearchSpace:
     parameters: List[Parameter] = field(default_factory=list)
     seed: int = 42
 
+    @classmethod
+    def from_dict(cls, spec: Dict[str, Any], seed: int = 42) -> "SearchSpace":
+        """从字典简写构造搜索空间
+
+        支持两种写法::
+
+            SearchSpace.from_dict({
+                "learning_rate": ("loguniform", 1e-5, 1e-3),   # (kind, low, high)
+                "lora.r": ("int_log", 8, 64),
+                "batch_size": ("categorical", [4, 8, 16]),      # (kind, values)
+                "dropout": {"kind": "uniform", "low": 0.0, "high": 0.2},
+            })
+
+        categorical 既可以写成 ``("categorical", [4, 8, 16])``，
+        也可以直接写 ``[4, 8, 16]``。
+        """
+        space = cls(seed=seed)
+        for name, definition in spec.items():
+            if isinstance(definition, dict):
+                kwargs = dict(definition)
+                kind = kwargs.pop("kind", "categorical")
+                space.add(Parameter(name, kind, **kwargs))
+                continue
+
+            if isinstance(definition, (list, tuple, set)):
+                parts = list(definition)
+                # 纯取值列表（如 [4, 8, 16]）：默认为 categorical
+                if not (parts and isinstance(parts[0], str)):
+                    space.add(Parameter(name, "categorical", values=parts))
+                    continue
+
+                kind, rest = parts[0], parts[1:]
+                if kind not in _KINDS:
+                    raise ValueError(f"参数 {name} 的类型不合法: {kind}，可选: {sorted(_KINDS)}")
+
+                if kind == "categorical":
+                    # ("categorical", [4, 8, 16]) 或 ("categorical", 4, 8, 16)
+                    values = rest[0] if len(rest) == 1 and isinstance(rest[0], (list, tuple, set)) else rest
+                    space.add(Parameter(name, "categorical", values=list(values)))
+                    continue
+
+                # 区间类型：(kind, low, high) 或 (kind, (low, high))
+                if len(rest) == 1 and isinstance(rest[0], (list, tuple)) and len(rest[0]) == 2:
+                    low, high = rest[0]
+                elif len(rest) == 2:
+                    low, high = rest
+                else:
+                    raise ValueError(
+                        f"参数 {name}（类型 {kind}）需要 (low, high) 两个边界，收到: {rest!r}"
+                    )
+                space.add(Parameter(name, kind, low=low, high=high))
+                continue
+
+            raise ValueError(
+                f"参数 {name} 的定义无法解析: {definition!r}。"
+                "可用形式: (kind, low, high) / (kind, [values]) / [values] / dict"
+            )
+        return space
+
     def add(self, parameter: Parameter) -> "SearchSpace":
         """追加一个参数，返回自身以支持链式调用"""
         self.parameters.append(parameter)

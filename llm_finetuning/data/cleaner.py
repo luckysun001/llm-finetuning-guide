@@ -194,7 +194,16 @@ def length_stats(records: Iterable[Dict[str, Any]], text_field: str = "text") ->
         len(str(r.get(text_field, ""))) for r in records if isinstance(r, dict)
     ]
     if not lengths:
-        return {"count": 0, "min": 0.0, "max": 0.0, "mean": 0.0, "median": 0.0}
+        return {
+            "count": 0,
+            "min": 0.0,
+            "max": 0.0,
+            "mean": 0.0,
+            "median": 0.0,
+            "p90": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+        }
 
     ordered = sorted(lengths)
     mid = len(ordered) // 2
@@ -203,10 +212,18 @@ def length_stats(records: Iterable[Dict[str, Any]], text_field: str = "text") ->
         if len(ordered) % 2 == 1
         else (ordered[mid - 1] + ordered[mid]) / 2
     )
-    return {
+    result = {
         "count": len(lengths),
         "min": float(ordered[0]),
         "max": float(ordered[-1]),
         "mean": sum(lengths) / len(lengths),
         "median": float(median),
     }
+
+    # 分位数：决定 max_seq_length 时比 max 更有参考价值
+    # （max 常被极少数长尾样本拉高，按它设阈值会浪费大量算力）
+    for q in (0.90, 0.95, 0.99):
+        idx = min(int(round(q * (len(ordered) - 1))), len(ordered) - 1)
+        result[f"p{int(q * 100)}"] = float(ordered[idx])
+
+    return result

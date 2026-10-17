@@ -108,9 +108,20 @@ apply_params(config, result.best_params)
 
 完整示例见 [`examples/04_hyperparameter_search.py`](examples/04_hyperparameter_search.py)。
 
-### 📦 待实现功能
+### 📓 Jupyter 教程
 
-- **Jupyter 教程 notebooks** 尚未提供（其余曾标注 TODO 的能力均已实现）
+`notebooks/` 下 5 篇教程，从零基础到上线，循序渐进：
+
+| 教程 | 内容 | 是否需要 GPU |
+|---|---|---|
+| [01_quickstart](notebooks/01_quickstart.ipynb) | 环境自检 → 配置 → 数据 → 训练全流程 | 训练环节需要 |
+| [02_lora_qlora](notebooks/02_lora_qlora.ipynb) | LoRA / QLoRA / AdaLoRA / IA³ 选型与显存估算 | 否 |
+| [03_data_preparation](notebooks/03_data_preparation.ipynb) | 清洗、去重、长度分位数体检、划分落盘 | 否 |
+| [04_evaluate_export_deploy](notebooks/04_evaluate_export_deploy.ipynb) | 评估、三格式导出、FastAPI 服务 | 仅加载模型时需要 |
+| [05_hyperparameter_search](notebooks/05_hyperparameter_search.ipynb) | 搜索空间、网格 vs 随机、结果回写配置 | 否 |
+
+> 教程里需要 GPU 的单元都会自动跳过并给出提示，不会中断阅读。
+> CI 会对 notebooks 做静态校验（结构、语法、引用的 API 是否存在），避免教程腐化。
 
 ---
 
@@ -150,7 +161,8 @@ llm-finetuning-guide/
 │   │
 │   ├── deploy/                 # 模型部署
 │   │   ├── __init__.py
-│   │   └── server.py           # FastAPI 服务 + transformers/vLLM 后端
+│   │   ├── server.py           # FastAPI 服务 + transformers/vLLM 后端
+│   │   └── __main__.py         # python -m llm_finetuning.deploy 入口
 │   │
 │   ├── evaluation/             # 评估模块
 │   │   ├── __init__.py
@@ -180,19 +192,27 @@ llm-finetuning-guide/
 │   ├── cli.py                  # 训练/评估/合并 CLI 入口
 │   └── make_sample_data.py     # 生成示例指令数据
 │
-└── tests/                      # 单元测试
-    ├── __init__.py
-    ├── test_config.py          # 配置序列化测试
-    ├── test_data.py            # 数据加载测试
-    ├── test_processor.py       # 数据处理器测试
-    ├── test_cleaner.py         # 数据清洗与去重测试
-    ├── test_export.py          # 模型导出测试
-    ├── test_deploy.py          # 部署服务测试
-    ├── test_adapters.py        # AdaLoRA / IA³ 配置测试
-    └── test_tuning.py          # 超参数搜索测试
+├── tests/                      # 单元测试
+│   ├── __init__.py
+│   ├── test_config.py          # 配置序列化测试
+│   ├── test_data.py            # 数据加载测试
+│   ├── test_processor.py       # 数据处理器测试
+│   ├── test_cleaner.py         # 数据清洗与去重测试
+│   ├── test_export.py          # 模型导出测试
+│   ├── test_deploy.py          # 部署服务测试
+│   ├── test_adapters.py        # AdaLoRA / IA³ 配置测试
+│   ├── test_tuning.py          # 超参数搜索测试
+│   └── test_notebooks.py       # 教程 notebooks 静态校验
+│
+└── notebooks/                  # Jupyter 教程
+    ├── 01_quickstart.ipynb
+    ├── 02_lora_qlora.ipynb
+    ├── 03_data_preparation.ipynb
+    ├── 04_evaluate_export_deploy.ipynb
+    └── 05_hyperparameter_search.ipynb
 ```
 
-> **注意**：README 之前版本声称的 `trainers/`（5 个文件）、`notebooks/`、`quickstart.py`、`requirements.txt`、`.env.example`、`assets/` 等目录和文件均不存在。实际功能以本文件结构为准。
+> **注意**：README 之前版本声称的 `trainers/`（5 个文件）、`quickstart.py`、`requirements.txt`、`.env.example`、`assets/` 等目录和文件均不存在。实际功能以本文件结构为准。
 
 ---
 
@@ -281,12 +301,19 @@ print(result.to_dict())
 pip install fastapi uvicorn        # transformers 后端
 # 或 pip install vllm              # 高吞吐后端
 
+python -m llm_finetuning.deploy --model-path ./checkpoints/qlora-7b --backend transformers
+# 高吞吐后端：--backend vllm
+
+# 等价的 Python 写法
 python -c "
 from llm_finetuning.deploy import DeployConfig, run_server
 run_server(DeployConfig(model_path='./checkpoints/qlora-7b', backend='transformers'))
 "
 # curl -X POST localhost:8000/v1/generate -d '{\"prompt\": \"你好\", \"max_new_tokens\": 64}'
 ```
+
+服务启动后提供 `GET /health`、`GET /v1/info`、`POST /v1/generate` 三个接口，
+生成参数（`max_new_tokens` / `temperature` / `top_p`）可在请求级覆盖。
 
 ---
 
@@ -351,9 +378,9 @@ pytest tests/ -v
 - [x] 补充 `configs/` YAML 配置文件
 - [x] 补充示例数据生成脚本与数据格式说明
 - [x] 实现数据清洗/去重模块
-- [ ] 补充 Jupyter notebooks 教程
-- [ ] 超参数搜索
-- [ ] 补充更多测试用例
+- [x] 补充 Jupyter notebooks 教程（5 篇，CI 静态校验）
+- [x] 超参数搜索（`tuning/` 模块 + `SearchSpace.from_dict` 简写构造）
+- [x] 补充更多测试用例（导出/部署/清洗/适配器/搜索/教程校验，共 177 个）
 
 ---
 

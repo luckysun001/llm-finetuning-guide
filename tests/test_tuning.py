@@ -364,3 +364,63 @@ def test_search_loop_with_default_space_and_config_roundtrip():
     applied = apply_params(config, result.best_params)
     assert "learning_rate" in applied
     assert config.training.learning_rate == result.best_params["learning_rate"]
+
+
+# ---------------------------------------------------------------------------
+# SearchSpace.from_dict：字典简写构造
+# ---------------------------------------------------------------------------
+
+
+def test_from_dict_parses_tuple_shorthands():
+    space = SearchSpace.from_dict(
+        {
+            "learning_rate": ("loguniform", 1e-5, 1e-3),
+            "lora.r": ("int_log", 4, 64),
+            "batch_size": ("categorical", [4, 8, 16]),
+            "warmup_ratio": ("uniform", 0.0, 0.2),
+        }
+    )
+    kinds = {p.name: p.kind for p in space.parameters}
+    assert kinds == {
+        "learning_rate": "loguniform",
+        "lora.r": "int_log",
+        "batch_size": "categorical",
+        "warmup_ratio": "uniform",
+    }
+    assert space.names() == ["learning_rate", "lora.r", "batch_size", "warmup_ratio"]
+
+
+def test_from_dict_accepts_dict_and_plain_list():
+    space = SearchSpace.from_dict(
+        {
+            "a": {"kind": "uniform", "low": 0.0, "high": 1.0},
+            "b": [1, 2, 3],
+            "c": ("categorical", 5, 6),
+        }
+    )
+    by_name = {p.name: p for p in space.parameters}
+    assert by_name["a"].kind == "uniform"
+    assert (by_name["a"].low, by_name["a"].high) == (0.0, 1.0)
+    assert by_name["b"].kind == "categorical" and by_name["b"].values == [1, 2, 3]
+    assert by_name["c"].values == [5, 6]
+
+
+def test_from_dict_samples_respect_bounds():
+    space = SearchSpace.from_dict(
+        {"lr": ("loguniform", 1e-5, 1e-3), "r": ("int_log", 4, 64)}
+    )
+    rng = random.Random(0)
+    for _ in range(50):
+        sample = space.sample(rng)
+        assert 1e-5 <= sample["lr"] <= 1e-3
+        assert 4 <= sample["r"] <= 64
+
+
+def test_from_dict_rejects_unknown_kind():
+    with pytest.raises(ValueError, match="类型不合法"):
+        SearchSpace.from_dict({"x": ("not_a_kind", 0.0, 1.0)})
+
+
+def test_from_dict_rejects_bad_bounds():
+    with pytest.raises(ValueError, match=r"\(low, high\)"):
+        SearchSpace.from_dict({"x": ("uniform", 0.0)})

@@ -158,3 +158,24 @@ class TestValidation:
     def test_max_smaller_than_min(self):
         with pytest.raises(ValueError):
             DataCleaner(min_length=10, max_length=5)
+
+
+def test_length_stats_includes_quantiles():
+    """分位数用于决定 max_seq_length（max 容易被长尾带偏）"""
+    records = [{"text": "x" * i} for i in range(1, 101)]
+    stats = length_stats(records)
+
+    for key in ("p90", "p95", "p99"):
+        assert key in stats
+
+    assert stats["p90"] == 90
+    assert stats["p95"] == 95
+    assert stats["p99"] == 99
+    # 分位数必须落在 [min, max] 内且单调不减
+    assert stats["min"] <= stats["p90"] <= stats["p95"] <= stats["p99"] <= stats["max"]
+
+
+def test_length_stats_empty_includes_zero_quantiles():
+    stats = length_stats([])
+    assert stats["count"] == 0
+    assert stats["p95"] == 0.0
