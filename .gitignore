@@ -76,3 +76,8 @@ outputs/
 # WorkBuddy local data
 .workbuddy/
 .pytest_cache/
+
+# Coverage reports
+.coverage
+coverage.xml
+htmlcov/
