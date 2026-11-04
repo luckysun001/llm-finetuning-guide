@@ -337,6 +337,16 @@ run_server(DeployConfig(model_path='./checkpoints/qlora-7b', backend='transforme
 pytest tests/ -v
 ```
 
+### 持续集成 (CI)
+
+所有改动都经过 GitHub Actions 自动验证（`.github/workflows/ci.yml`）：
+
+- **触发条件**：`push` 与 `pull_request` 均覆盖 `main` 与 `dev` 分支
+- **运行环境**：Ubuntu，Python 3.11 / 3.12 双版本矩阵（`fail-fast: false`）
+- **验证内容**：`poetry install --with dev` 后运行 `poetry run pytest`
+
+> **依赖说明**：依赖由 Poetry 管理（`pyproject.toml`，`python = ">=3.11,<3.13"`）。当前仓库尚未提交 `poetry.lock`，如需完全可复现的构建，建议在本地 `poetry lock` 后一并提交。
+
 ---
 
 ## 📚 最佳实践
