@@ -3,7 +3,7 @@
 """
 
 import os
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 from dataclasses import dataclass, field
 
 
@@ -165,7 +165,7 @@ class ModelEvaluator:
                 "prediction": generated_text[len(prompt):],
             })
 
-        print(f"✅ 示例生成完成")
+        print("✅ 示例生成完成")
         return samples
 
     def evaluate(

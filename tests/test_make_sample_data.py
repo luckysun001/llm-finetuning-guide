@@ -2,7 +2,6 @@
 测试示例数据生成脚本（纯 Python，无 torch 依赖）。
 """
 
-import importlib.util
 import json
 import os
 import sys

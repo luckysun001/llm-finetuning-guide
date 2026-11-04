@@ -5,7 +5,6 @@ LLM 微调 CLI 工具
 """
 
 import argparse
-import json
 import os
 import sys
 from pathlib import Path
@@ -23,7 +22,7 @@ def cmd_init(args):
         print(f"   ✅ 创建目录: {d}/")
 
     # 创建示例配置
-    from llm_finetuning import Config, FinetuningMethod, LoRAConfig
+    from llm_finetuning import Config, FinetuningMethod
 
     config = Config(
         model_name_or_path="bigscience/bloom-560m",
@@ -31,7 +30,7 @@ def cmd_init(args):
         output_dir="./checkpoints/default",
     )
     config.save_to_yaml("./configs/default.yaml")
-    print(f"   ✅ 创建配置: configs/default.yaml")
+    print("   ✅ 创建配置: configs/default.yaml")
 
     print("\n✅ 初始化完成！")
 
@@ -143,7 +142,7 @@ def cmd_eval(args):
 
 def cmd_merge(args):
     """合并 LoRA 适配器"""
-    print(f"🔄 合并模型适配器")
+    print("🔄 合并模型适配器")
     print(f"   适配器路径: {args.adapter}")
     print(f"   输出路径: {args.output}")
 
@@ -215,7 +214,7 @@ def main():
     subparsers = parser.add_subparsers(dest="command", help="可用命令")
 
     # init 命令
-    init_parser = subparsers.add_parser("init", help="初始化项目结构")
+    subparsers.add_parser("init", help="初始化项目结构")
 
     # train 命令
     train_parser = subparsers.add_parser("train", help="开始模型微调")

@@ -4,7 +4,7 @@
 """
 
 import os
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 from pathlib import Path
 
 
@@ -267,7 +267,7 @@ class TrainingVisualizer:
             </div>
 """
 
-        html_content += f"""
+        html_content += """
         </div>
     </div>
 

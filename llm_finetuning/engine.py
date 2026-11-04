@@ -4,7 +4,6 @@
 
 import os
 from typing import Any, Callable, Dict, List, Optional
-from pathlib import Path
 
 from llm_finetuning.config import Config, FinetuningMethod
 from llm_finetuning.methods.lora import LoRAFinetuner, QLoRAFinetuner
@@ -63,7 +62,7 @@ class FinetuningEngine:
             "learning_rate": [],
         }
 
-        print(f"🚀 初始化微调引擎")
+        print("🚀 初始化微调引擎")
         print(f"   模型: {config.model_name_or_path}")
         print(f"   方法: {config.finetuning_method.value}")
         print(f"   输出目录: {config.training.output_dir}")
@@ -120,7 +119,7 @@ class FinetuningEngine:
                 seed=self.config.data.seed,
             )
 
-        print(f"✅ 数据集准备完成")
+        print("✅ 数据集准备完成")
         print(f"   训练集: {len(train_dataset)} 条")
         print(f"   验证集: {len(eval_dataset)} 条")
 
@@ -342,7 +341,7 @@ class FinetuningEngine:
                 "merged_model",
             )
 
-        print(f"\n🔄 合并模型适配器...")
+        print("\n🔄 合并模型适配器...")
         self.finetuner.merge_and_save(output_dir)
 
         return output_dir

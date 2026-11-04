@@ -14,7 +14,7 @@ import os
 import random
 import time
 from dataclasses import dataclass, field, asdict
-from typing import Any, Callable, Dict, List, Optional, Sequence
+from typing import Any, Callable, Dict, List, Optional
 
 from llm_finetuning.tuning.search_space import Parameter, SearchSpace
 

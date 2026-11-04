@@ -4,7 +4,7 @@ Low-Rank Adaptation of Large Language Models
 """
 
 import os
-from typing import Any, Dict, Optional, Union
+from typing import Any, Optional
 
 from llm_finetuning.config import Config, LoRAConfig, QLoRAConfig
 
@@ -168,7 +168,7 @@ class LoRAFinetuner:
         self.tokenizer.save_pretrained(save_dir)
 
         print(f"✅ 模型已保存到: {save_dir}")
-        print(f"   注意: 只保存了 LoRA 适配器，不是完整模型")
+        print("   注意: 只保存了 LoRA 适配器，不是完整模型")
 
     def merge_and_save(self, output_dir: str):
         """合并 LoRA 适配器并保存完整模型"""

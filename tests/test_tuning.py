@@ -15,7 +15,6 @@ from llm_finetuning.config import Config, FinetuningMethod
 from llm_finetuning.tuning import (
     HyperparameterSearcher,
     Parameter,
-    SearchResult,
     SearchSpace,
     Trial,
     apply_params,

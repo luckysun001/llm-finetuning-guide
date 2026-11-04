@@ -111,7 +111,7 @@ class TestCreateApp:
 
     @pytest.fixture
     def app(self):
-        fastapi = pytest.importorskip("fastapi")
+        pytest.importorskip("fastapi")
         from fastapi.testclient import TestClient
 
         backend = _FakeBackend()

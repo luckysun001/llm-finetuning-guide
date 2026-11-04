@@ -7,7 +7,6 @@
   （不会真的去绑定端口启动服务）
 """
 
-import sys
 import unittest
 from unittest import mock
 
