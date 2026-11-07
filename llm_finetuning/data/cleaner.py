@@ -78,9 +78,7 @@ class DataCleaner:
         if min_length < 0:
             raise ValueError(f"min_length 不能为负: {min_length}")
         if max_length is not None and max_length < min_length:
-            raise ValueError(
-                f"max_length({max_length}) 不能小于 min_length({min_length})"
-            )
+            raise ValueError(f"max_length({max_length}) 不能小于 min_length({min_length})")
 
         self.text_field = text_field
         self.min_length = min_length
@@ -94,9 +92,7 @@ class DataCleaner:
     # ------------------------------------------------------------------
     # 主入口
     # ------------------------------------------------------------------
-    def clean(
-        self, records: Iterable[Dict[str, Any]]
-    ) -> Tuple[List[Dict[str, Any]], CleanReport]:
+    def clean(self, records: Iterable[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], CleanReport]:
         """清洗数据集
 
         Args:
@@ -169,9 +165,7 @@ class DataCleaner:
         stripped = re.sub(r"[\s\W_]+", "", text, flags=re.UNICODE)
         return stripped
 
-    def _record_removed(
-        self, report: CleanReport, record: Any, reason: str
-    ) -> None:
+    def _record_removed(self, report: CleanReport, record: Any, reason: str) -> None:
         if self.keep_report_samples <= 0:
             return
         if len(report.removed_samples) >= self.keep_report_samples:
@@ -182,7 +176,9 @@ class DataCleaner:
             report.removed_samples.append(sample)
 
 
-def deduplicate(records: Iterable[Dict[str, Any]], text_field: str = "text") -> List[Dict[str, Any]]:
+def deduplicate(
+    records: Iterable[Dict[str, Any]], text_field: str = "text"
+) -> List[Dict[str, Any]]:
     """只做去重的便捷函数"""
     cleaned, _ = DataCleaner(text_field=text_field).clean(records)
     return cleaned
@@ -190,9 +186,7 @@ def deduplicate(records: Iterable[Dict[str, Any]], text_field: str = "text") -> 
 
 def length_stats(records: Iterable[Dict[str, Any]], text_field: str = "text") -> Dict[str, float]:
     """统计文本长度分布（用于决定 min_length / max_length 阈值）"""
-    lengths = [
-        len(str(r.get(text_field, ""))) for r in records if isinstance(r, dict)
-    ]
+    lengths = [len(str(r.get(text_field, ""))) for r in records if isinstance(r, dict)]
     if not lengths:
         return {
             "count": 0,
@@ -207,11 +201,7 @@ def length_stats(records: Iterable[Dict[str, Any]], text_field: str = "text") ->
 
     ordered = sorted(lengths)
     mid = len(ordered) // 2
-    median = (
-        ordered[mid]
-        if len(ordered) % 2 == 1
-        else (ordered[mid - 1] + ordered[mid]) / 2
-    )
+    median = ordered[mid] if len(ordered) % 2 == 1 else (ordered[mid - 1] + ordered[mid]) / 2
     result = {
         "count": len(lengths),
         "min": float(ordered[0]),

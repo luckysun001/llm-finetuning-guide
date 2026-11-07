@@ -24,7 +24,7 @@ class LoRAFinetuner:
             from peft import LoraConfig, TaskType
 
             # 根据配置创建 LoRA 配置
-            lora_config = getattr(self.config, 'lora_config', LoRAConfig())
+            lora_config = getattr(self.config, "lora_config", LoRAConfig())
 
             self.peft_config = LoraConfig(
                 r=lora_config.r,
@@ -38,19 +38,13 @@ class LoRAFinetuner:
             return self.peft_config
 
         except ImportError:
-            raise ImportError(
-                "peft 模块未安装，请执行: pip install peft"
-            )
+            raise ImportError("peft 模块未安装，请执行: pip install peft")
 
     def load_model_and_tokenizer(self) -> tuple:
         """加载预训练模型和分词器"""
         try:
-            from transformers import (
-                AutoModelForCausalLM,
-                AutoTokenizer,
-                BitsAndBytesConfig,
-            )
             import torch
+            from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
             # 加载分词器
             self.tokenizer = AutoTokenizer.from_pretrained(
@@ -62,12 +56,16 @@ class LoRAFinetuner:
 
             # 量化配置（如果是 QLoRA）
             quantization_config = None
-            if hasattr(self.config, 'lora_config') and isinstance(self.config.lora_config, QLoRAConfig):
+            if hasattr(self.config, "lora_config") and isinstance(
+                self.config.lora_config, QLoRAConfig
+            ):
                 quantization_config = BitsAndBytesConfig(
                     load_in_4bit=self.config.lora_config.load_in_4bit,
                     bnb_4bit_use_double_quant=self.config.lora_config.bnb_4bit_use_double_quant,
                     bnb_4bit_quant_type=self.config.lora_config.bnb_4bit_quant_type,
-                    bnb_4bit_compute_dtype=getattr(torch, self.config.lora_config.bnb_4bit_compute_dtype),
+                    bnb_4bit_compute_dtype=getattr(
+                        torch, self.config.lora_config.bnb_4bit_compute_dtype
+                    ),
                 )
 
             # 加载模型
@@ -83,8 +81,7 @@ class LoRAFinetuner:
 
         except ImportError as e:
             raise ImportError(
-                f"transformers 或 torch 未安装: {e}\n"
-                f"请执行: pip install torch transformers"
+                f"transformers 或 torch 未安装: {e}\n" f"请执行: pip install torch transformers"
             )
 
     def apply_lora(self) -> Any:
@@ -102,14 +99,15 @@ class LoRAFinetuner:
             return self.model
 
         except ImportError:
-            raise ImportError(
-                "peft 模块未安装，请执行: pip install peft"
-            )
+            raise ImportError("peft 模块未安装，请执行: pip install peft")
 
     def train(self, train_dataset, eval_dataset=None, callbacks=None):
         """训练模型"""
         try:
-            from transformers import TrainingArguments, Trainer
+            from transformers import (  # noqa: F401  (optional-dependency probe)
+                Trainer,
+                TrainingArguments,
+            )
             from trl import SFTTrainer
 
             # 设置训练参数
@@ -126,7 +124,9 @@ class LoRAFinetuner:
                 bf16=self.config.training.bf16,
                 logging_steps=self.config.training.logging_steps,
                 save_strategy=self.config.training.save_strategy,
-                evaluation_strategy=self.config.training.evaluation_strategy if eval_dataset else "no",
+                evaluation_strategy=(
+                    self.config.training.evaluation_strategy if eval_dataset else "no"
+                ),
                 save_total_limit=self.config.training.save_total_limit,
                 load_best_model_at_end=eval_dataset is not None,
                 report_to=self.config.training.report_to,
@@ -193,7 +193,7 @@ class QLoRAFinetuner(LoRAFinetuner):
     def __init__(self, config: Config):
         super().__init__(config)
         # 确保使用 QLoRA 配置
-        if not hasattr(config, 'lora_config') or not isinstance(config.lora_config, QLoRAConfig):
+        if not hasattr(config, "lora_config") or not isinstance(config.lora_config, QLoRAConfig):
             config.lora_config = QLoRAConfig()
             config.quantization_level = "int4"
 

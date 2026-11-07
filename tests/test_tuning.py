@@ -21,7 +21,6 @@ from llm_finetuning.tuning import (
     default_lora_space,
 )
 
-
 # ---------------- Parameter ----------------
 
 
@@ -152,9 +151,7 @@ def test_grid_search_finds_minimum():
 
 def test_maximize_direction_picks_largest_score():
     space = SearchSpace([Parameter("x", "int", low=0, high=5)])
-    searcher = HyperparameterSearcher(
-        space, lambda p: -((p["x"] - 5) ** 2), direction="maximize"
-    )
+    searcher = HyperparameterSearcher(space, lambda p: -((p["x"] - 5) ** 2), direction="maximize")
     result = searcher.grid_search()
     assert result.best_params == {"x": 5}
 
@@ -405,9 +402,7 @@ def test_from_dict_accepts_dict_and_plain_list():
 
 
 def test_from_dict_samples_respect_bounds():
-    space = SearchSpace.from_dict(
-        {"lr": ("loguniform", 1e-5, 1e-3), "r": ("int_log", 4, 64)}
-    )
+    space = SearchSpace.from_dict({"lr": ("loguniform", 1e-5, 1e-3), "r": ("int_log", 4, 64)})
     rng = random.Random(0)
     for _ in range(50):
         sample = space.sample(rng)

@@ -117,9 +117,9 @@ def test_imported_symbols_exist(path):
             for name in names:
                 if name in _KNOWN_NON_API or name == "import":
                     continue
-                assert hasattr(mod, name), (
-                    f"{path.name}: {module_name} 中没有 {name} —— 教程引用了不存在的 API"
-                )
+                assert hasattr(
+                    mod, name
+                ), f"{path.name}: {module_name} 中没有 {name} —— 教程引用了不存在的 API"
                 checked += 1
 
     assert checked > 0, f"{path.name} 未检出任何 API 引用，正则可能失效"

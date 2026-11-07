@@ -4,8 +4,8 @@
 """
 
 import os
-from typing import Dict, List, Optional
 from pathlib import Path
+from typing import Dict, List, Optional
 
 
 class TrainingVisualizer:
@@ -31,25 +31,32 @@ class TrainingVisualizer:
 
             # 训练损失
             steps = np.arange(len(train_losses))
-            plt.plot(steps, train_losses, label='训练损失', linewidth=2, color='#1f77b4')
+            plt.plot(steps, train_losses, label="训练损失", linewidth=2, color="#1f77b4")
 
             # 评估损失
             if eval_losses:
                 eval_steps = np.linspace(0, len(train_losses) - 1, len(eval_losses))
-                plt.plot(eval_steps, eval_losses, label='验证损失', linewidth=2,
-                        color='#ff7f0e', marker='o', markersize=4)
+                plt.plot(
+                    eval_steps,
+                    eval_losses,
+                    label="验证损失",
+                    linewidth=2,
+                    color="#ff7f0e",
+                    marker="o",
+                    markersize=4,
+                )
 
-            plt.xlabel('训练步数', fontsize=12)
-            plt.ylabel('损失 (Loss)', fontsize=12)
-            plt.title(title, fontsize=14, fontweight='bold')
+            plt.xlabel("训练步数", fontsize=12)
+            plt.ylabel("损失 (Loss)", fontsize=12)
+            plt.title(title, fontsize=14, fontweight="bold")
             plt.legend(fontsize=10)
             plt.grid(True, alpha=0.3)
 
             # 保存
             if save_path is None:
-                save_path = os.path.join(self.output_dir, 'loss_curve.png')
+                save_path = os.path.join(self.output_dir, "loss_curve.png")
 
-            plt.savefig(save_path, dpi=300, bbox_inches='tight')
+            plt.savefig(save_path, dpi=300, bbox_inches="tight")
             plt.close()
 
             print(f"✅ 损失曲线已保存到: {save_path}")
@@ -73,18 +80,18 @@ class TrainingVisualizer:
             plt.figure(figsize=(10, 6))
 
             steps = np.arange(len(learning_rates))
-            plt.plot(steps, learning_rates, linewidth=2, color='#2ca02c')
+            plt.plot(steps, learning_rates, linewidth=2, color="#2ca02c")
 
-            plt.xlabel('训练步数', fontsize=12)
-            plt.ylabel('学习率', fontsize=12)
-            plt.title(title, fontsize=14, fontweight='bold')
+            plt.xlabel("训练步数", fontsize=12)
+            plt.ylabel("学习率", fontsize=12)
+            plt.title(title, fontsize=14, fontweight="bold")
             plt.grid(True, alpha=0.3)
-            plt.yscale('log')
+            plt.yscale("log")
 
             if save_path is None:
-                save_path = os.path.join(self.output_dir, 'learning_rate_curve.png')
+                save_path = os.path.join(self.output_dir, "learning_rate_curve.png")
 
-            plt.savefig(save_path, dpi=300, bbox_inches='tight')
+            plt.savefig(save_path, dpi=300, bbox_inches="tight")
             plt.close()
 
             print(f"✅ 学习率曲线已保存到: {save_path}")
@@ -119,35 +126,35 @@ class TrainingVisualizer:
             x = np.arange(len(checkpoint_names))
             width = 0.6
 
-            colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd']
+            colors = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd"]
 
             for i, metric in enumerate(metric_names):
                 values = [metrics[chk][metric] for chk in checkpoint_names]
                 bars = axes[i].bar(x, values, width, color=colors[i % len(colors)])
-                axes[i].set_xlabel('检查点', fontsize=11)
+                axes[i].set_xlabel("检查点", fontsize=11)
                 axes[i].set_ylabel(metric, fontsize=11)
-                axes[i].set_title(f'{metric} 对比', fontsize=12, fontweight='bold')
+                axes[i].set_title(f"{metric} 对比", fontsize=12, fontweight="bold")
                 axes[i].set_xticks(x)
-                axes[i].set_xticklabels(checkpoint_names, rotation=45, ha='right')
-                axes[i].grid(True, alpha=0.3, axis='y')
+                axes[i].set_xticklabels(checkpoint_names, rotation=45, ha="right")
+                axes[i].grid(True, alpha=0.3, axis="y")
 
                 # 在柱子上显示数值
                 for bar in bars:
                     height = bar.get_height()
                     axes[i].text(
-                        bar.get_x() + bar.get_width() / 2.,
+                        bar.get_x() + bar.get_width() / 2.0,
                         height,
-                        f'{height:.2f}',
-                        ha='center',
-                        va='bottom',
+                        f"{height:.2f}",
+                        ha="center",
+                        va="bottom",
                     )
 
             plt.tight_layout()
 
             if save_path is None:
-                save_path = os.path.join(self.output_dir, 'evaluation_comparison.png')
+                save_path = os.path.join(self.output_dir, "evaluation_comparison.png")
 
-            plt.savefig(save_path, dpi=300, bbox_inches='tight')
+            plt.savefig(save_path, dpi=300, bbox_inches="tight")
             plt.close()
 
             print(f"✅ 评估对比图已保存到: {save_path}")
@@ -182,9 +189,9 @@ class TrainingVisualizer:
             colors = plt.cm.RdYlGn_r(np.linspace(0.2, 0.8, len(model_names)))
             bars = plt.barh(model_names, ppl_values, color=colors)
 
-            plt.xlabel('困惑度 (Perplexity) - 越低越好', fontsize=12)
-            plt.title(title, fontsize=14, fontweight='bold')
-            plt.grid(True, alpha=0.3, axis='x')
+            plt.xlabel("困惑度 (Perplexity) - 越低越好", fontsize=12)
+            plt.title(title, fontsize=14, fontweight="bold")
+            plt.grid(True, alpha=0.3, axis="x")
 
             # 在柱子上显示数值
             for bar in bars:
@@ -192,17 +199,17 @@ class TrainingVisualizer:
                 plt.text(
                     width + 0.3,
                     bar.get_y() + bar.get_height() / 2,
-                    f'{width:.2f}',
-                    ha='left',
-                    va='center',
+                    f"{width:.2f}",
+                    ha="left",
+                    va="center",
                 )
 
             plt.gca().invert_yaxis()  # 最好的在上面
 
             if save_path is None:
-                save_path = os.path.join(self.output_dir, 'perplexity_comparison.png')
+                save_path = os.path.join(self.output_dir, "perplexity_comparison.png")
 
-            plt.savefig(save_path, dpi=300, bbox_inches='tight')
+            plt.savefig(save_path, dpi=300, bbox_inches="tight")
             plt.close()
 
             print(f"✅ 困惑度对比图已保存到: {save_path}")
@@ -223,7 +230,7 @@ class TrainingVisualizer:
     ) -> str:
         """创建完整的训练报告（HTML格式）"""
         if save_path is None:
-            save_path = os.path.join(self.output_dir, 'training_report.html')
+            save_path = os.path.join(self.output_dir, "training_report.html")
 
         html_content = f"""
 <!DOCTYPE html>
@@ -284,7 +291,7 @@ class TrainingVisualizer:
 </html>
 """
 
-        with open(save_path, 'w', encoding='utf-8') as f:
+        with open(save_path, "w", encoding="utf-8") as f:
             f.write(html_content)
 
         print(f"✅ 训练报告已生成: {save_path}")

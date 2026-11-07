@@ -1,20 +1,15 @@
 """数据清洗与去重模块测试"""
+
 import pytest
 
-from llm_finetuning.data.cleaner import (
-    CleanReport,
-    DataCleaner,
-    deduplicate,
-    length_stats,
-)
-
+from llm_finetuning.data.cleaner import CleanReport, DataCleaner, deduplicate, length_stats
 
 SAMPLES = [
     {"text": "第一条样本"},
     {"text": "第二条样本"},
-    {"text": "第一条样本"},          # 精确重复
-    {"text": "   "},                  # 空白
-    {"text": "短"},                   # 过短（min_length=5）
+    {"text": "第一条样本"},  # 精确重复
+    {"text": "   "},  # 空白
+    {"text": "短"},  # 过短（min_length=5）
 ]
 
 

@@ -85,9 +85,11 @@ class Parameter:
                 raw = [int(round(low + i * step)) for i in range(n)]
             else:
                 raw = [
-                    int(round(math.exp(
-                        math.log(low) + i * (math.log(high) - math.log(low)) / (n - 1)
-                    )))
+                    int(
+                        round(
+                            math.exp(math.log(low) + i * (math.log(high) - math.log(low)) / (n - 1))
+                        )
+                    )
                     for i in range(n)
                 ]
             # 去重并保持顺序
@@ -181,7 +183,11 @@ class SearchSpace:
 
                 if kind == "categorical":
                     # ("categorical", [4, 8, 16]) 或 ("categorical", 4, 8, 16)
-                    values = rest[0] if len(rest) == 1 and isinstance(rest[0], (list, tuple, set)) else rest
+                    values = (
+                        rest[0]
+                        if len(rest) == 1 and isinstance(rest[0], (list, tuple, set))
+                        else rest
+                    )
                     space.add(Parameter(name, "categorical", values=list(values)))
                     continue
 
@@ -218,7 +224,7 @@ class SearchSpace:
         names = [p.name for p in self.parameters]
         value_lists = [p.grid_values(max_points) for p in self.parameters]
         for combo in itertools.product(*value_lists):
-            yield dict(zip(names, combo))
+            yield dict(zip(names, combo, strict=False))
 
     def sample(self, rng: Optional[random.Random] = None) -> Dict[str, Any]:
         """随机采样一组参数"""

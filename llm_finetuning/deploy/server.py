@@ -24,8 +24,8 @@ class DeployConfig:
     backend: str = "transformers"  # transformers | vllm
     host: str = "0.0.0.0"
     port: int = 8000
-    device: str = "auto"           # auto | cuda | cpu
-    dtype: str = "auto"            # auto | fp16 | bf16 | fp32
+    device: str = "auto"  # auto | cuda | cpu
+    dtype: str = "auto"  # auto | fp16 | bf16 | fp32
     max_new_tokens: int = 256
     temperature: float = 0.7
     top_p: float = 0.9
@@ -38,9 +38,7 @@ class DeployConfig:
         if not self.model_path:
             raise ValueError("model_path 不能为空")
         if self.backend not in ("transformers", "vllm"):
-            raise ValueError(
-                f"不支持的推理后端: {self.backend}，可选: transformers / vllm"
-            )
+            raise ValueError(f"不支持的推理后端: {self.backend}，可选: transformers / vllm")
         if not (0 < self.temperature <= 2.0):
             raise ValueError(f"temperature 应在 (0, 2] 之间: {self.temperature}")
         if not (0 < self.top_p <= 1.0):
@@ -127,9 +125,7 @@ class TransformersBackend(InferenceBackend):
         }
         torch_dtype = dtype_map.get(config.dtype, "auto")
 
-        self._tokenizer = AutoTokenizer.from_pretrained(
-            config.model_path, trust_remote_code=True
-        )
+        self._tokenizer = AutoTokenizer.from_pretrained(config.model_path, trust_remote_code=True)
         self._model = AutoModelForCausalLM.from_pretrained(
             config.model_path,
             torch_dtype=torch_dtype,
@@ -250,9 +246,7 @@ def create_app(config: DeployConfig, backend: Optional[InferenceBackend] = None)
         from fastapi import FastAPI, HTTPException
         from pydantic import BaseModel
     except ImportError as exc:
-        raise ImportError(
-            "部署服务需要 fastapi，请先安装：pip install fastapi uvicorn"
-        ) from exc
+        raise ImportError("部署服务需要 fastapi，请先安装：pip install fastapi uvicorn") from exc
 
     config.validate()
     engine = backend or build_backend(config.backend)

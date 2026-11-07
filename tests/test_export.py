@@ -3,6 +3,7 @@
 不依赖 torch / transformers：只验证配置校验、体积估算与命令生成等纯逻辑，
 以及「缺依赖时给出可执行安装提示」的错误路径。
 """
+
 import pytest
 
 from llm_finetuning.export.exporter import (
@@ -51,13 +52,12 @@ class TestEstimateSize:
     def test_fp16_7b(self):
         # 7e9 参数 × 2 字节 ≈ 13363 MB
         assert ModelExporter.estimate_size_mb(7e9, "fp16") == pytest.approx(
-            7e9 * 2 / 1024 ** 2, rel=1e-6
+            7e9 * 2 / 1024**2, rel=1e-6
         )
 
     def test_quantization_reduces_size_monotonically(self):
         sizes = [
-            ModelExporter.estimate_size_mb(7e9, level)
-            for level in ("fp32", "fp16", "int8", "int4")
+            ModelExporter.estimate_size_mb(7e9, level) for level in ("fp32", "fp16", "int8", "int4")
         ]
         assert sizes == sorted(sizes, reverse=True)
 
@@ -160,9 +160,7 @@ class TestUtils:
 
 class TestExportResult:
     def test_to_dict_rounds_size(self):
-        result = ExportResult(
-            export_format="safetensors", output_dir="/tmp", size_mb=1.23456
-        )
+        result = ExportResult(export_format="safetensors", output_dir="/tmp", size_mb=1.23456)
         assert result.to_dict()["size_mb"] == 1.23
 
 

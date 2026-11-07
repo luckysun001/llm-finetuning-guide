@@ -50,6 +50,7 @@ def cmd_train(args):
         config = Config.from_yaml(args.config)
     else:
         from llm_finetuning import FinetuningMethod
+
         config = Config(
             model_name_or_path=args.model or "bigscience/bloom-560m",
             finetuning_method=FinetuningMethod(args.method or "lora"),
@@ -106,9 +107,7 @@ def cmd_eval(args):
         sys.exit(1)
 
     # 判断传入的数据集是 HuggingFace 名称还是本地文件路径
-    is_local = os.path.exists(args.dataset) or args.dataset.endswith(
-        (".json", ".jsonl", ".csv")
-    )
+    is_local = os.path.exists(args.dataset) or args.dataset.endswith((".json", ".jsonl", ".csv"))
     dataset_name = None if is_local else args.dataset
     dataset_path = args.dataset if is_local else None
 
@@ -148,9 +147,10 @@ def cmd_merge(args):
 
     try:
         import json
+
         import torch
-        from transformers import AutoModelForCausalLM, AutoTokenizer
         from peft import PeftModel
+        from transformers import AutoModelForCausalLM, AutoTokenizer
     except ImportError as e:
         print(f"❌ 缺少依赖 (torch/transformers/peft): {e}")
         print("   请执行: pip install torch transformers peft")
@@ -220,8 +220,9 @@ def main():
     train_parser = subparsers.add_parser("train", help="开始模型微调")
     train_parser.add_argument("--config", type=str, help="配置文件路径")
     train_parser.add_argument("--model", type=str, help="模型名称或路径")
-    train_parser.add_argument("--method", type=str, choices=["lora", "qlora", "full"],
-                             help="微调方法")
+    train_parser.add_argument(
+        "--method", type=str, choices=["lora", "qlora", "full"], help="微调方法"
+    )
     train_parser.add_argument("--dataset", type=str, help="HuggingFace 数据集名称")
     train_parser.add_argument("--data-path", type=str, help="本地数据集路径")
     train_parser.add_argument("--output", type=str, help="输出目录")

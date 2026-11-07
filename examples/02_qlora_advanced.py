@@ -18,9 +18,9 @@ def main():
     try:
         from llm_finetuning import (
             Config,
+            FinetuningEngine,
             FinetuningMethod,
             QLoRAConfig,
-            FinetuningEngine,
             create_sample_instruction_dataset,
         )
     except ImportError as e:
@@ -38,13 +38,13 @@ def main():
 
     # 自定义 QLoRA 参数
     config.lora_config = QLoRAConfig(
-        r=64,                          # 更高的秩 = 更强的表达能力
+        r=64,  # 更高的秩 = 更强的表达能力
         lora_alpha=128,
         target_modules=["query_key_value"],  # Bloom 模型的注意力模块
         lora_dropout=0.05,
         load_in_4bit=True,
         bnb_4bit_use_double_quant=True,
-        bnb_4bit_quant_type="nf4",     # 归一化浮点数，效果更好
+        bnb_4bit_quant_type="nf4",  # 归一化浮点数，效果更好
         bnb_4bit_compute_dtype="bfloat16",
     )
 

@@ -2,9 +2,9 @@
 测试配置模块
 """
 
-import unittest
-import tempfile
 import os
+import tempfile
+import unittest
 
 
 class TestConfig(unittest.TestCase):
@@ -64,7 +64,9 @@ class TestConfig(unittest.TestCase):
         train_config = TrainingConfig()
         self.assertEqual(train_config.num_train_epochs, 3)
         self.assertEqual(train_config.per_device_train_batch_size, 8)
-        self.assertEqual(train_config.learning_rate, 2e-5)  # TrainingConfig 默认值; LoRA/QLoRA 会覆写为 2e-4
+        self.assertEqual(
+            train_config.learning_rate, 2e-5
+        )  # TrainingConfig 默认值; LoRA/QLoRA 会覆写为 2e-4
 
     def test_config_yaml_save_load(self):
         """测试配置 YAML 保存和加载"""

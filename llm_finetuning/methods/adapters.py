@@ -13,12 +13,12 @@ PEFT 适配器配置工厂：LoRA / QLoRA / AdaLoRA / IA³
 from typing import Any, Dict, List
 
 from llm_finetuning.config import (
+    AdaLoRAConfig,
     Config,
     FinetuningMethod,
+    IA3Config,
     LoRAConfig,
     QLoRAConfig,
-    AdaLoRAConfig,
-    IA3Config,
 )
 
 __all__ = [
@@ -132,8 +132,7 @@ def build_peft_config_dict(config: Config) -> Dict[str, Any]:
         return payload
 
     raise ValueError(
-        f"暂不支持生成 {method} 的 PEFT 配置"
-        f"（已支持: lora / qlora / adalora / ia3 / full）"
+        f"暂不支持生成 {method} 的 PEFT 配置" f"（已支持: lora / qlora / adalora / ia3 / full）"
     )
 
 
@@ -145,7 +144,9 @@ def build_peft_config(config: Config) -> Any:
         ValueError: 微调方法不使用 PEFT 适配器时
     """
     try:
-        from peft import AdaLoraConfig, IA3Config as PeftIA3Config, LoraConfig, TaskType
+        from peft import AdaLoraConfig
+        from peft import IA3Config as PeftIA3Config
+        from peft import LoraConfig, TaskType
     except ImportError as exc:  # pragma: no cover - 取决于运行环境
         raise ImportError(
             "peft 未安装，无法构造 PEFT 配置对象，请执行: pip install peft\n"

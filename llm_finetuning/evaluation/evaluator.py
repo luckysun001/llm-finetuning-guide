@@ -3,13 +3,14 @@
 """
 
 import os
-from typing import Any, Dict, List, Optional
 from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional
 
 
 @dataclass
 class EvaluationResult:
     """评估结果"""
+
     perplexity: Optional[float] = None
     bleu_score: Optional[float] = None
     rouge_scores: Dict[str, float] = field(default_factory=dict)
@@ -55,6 +56,7 @@ class ModelEvaluator:
     ) -> float:
         """计算困惑度 (Perplexity)"""
         import math
+
         import torch
         from torch.utils.data import DataLoader
         from tqdm import tqdm
@@ -76,7 +78,9 @@ class ModelEvaluator:
                 # 准备输入
                 inputs = {
                     "input_ids": torch.stack(batch["input_ids"], dim=1).to(self.model.device),
-                    "attention_mask": torch.stack(batch["attention_mask"], dim=1).to(self.model.device),
+                    "attention_mask": torch.stack(batch["attention_mask"], dim=1).to(
+                        self.model.device
+                    ),
                     "labels": torch.stack(batch["labels"], dim=1).to(self.model.device),
                 }
 
@@ -88,7 +92,7 @@ class ModelEvaluator:
                 num_tokens += inputs["attention_mask"].sum().item()
                 total_loss += loss.item() * inputs["attention_mask"].sum().item()
 
-        perplexity = math.exp(total_loss / num_tokens) if num_tokens > 0 else float('inf')
+        perplexity = math.exp(total_loss / num_tokens) if num_tokens > 0 else float("inf")
         print(f"✅ 困惑度: {perplexity:.2f}")
         return perplexity
 
@@ -124,8 +128,10 @@ class ModelEvaluator:
             print("📊 计算 ROUGE 分数...")
             rouge = load("rouge")
             results = rouge.compute(predictions=predictions, references=references)
-            print(f"✅ ROUGE-1: {results['rouge1']:.4f}, ROUGE-2: {results['rouge2']:.4f}, "
-                  f"ROUGE-L: {results['rougeL']:.4f}")
+            print(
+                f"✅ ROUGE-1: {results['rouge1']:.4f}, ROUGE-2: {results['rouge2']:.4f}, "
+                f"ROUGE-L: {results['rougeL']:.4f}"
+            )
             return results
 
         except ImportError:
@@ -160,10 +166,12 @@ class ModelEvaluator:
 
             generated_text = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
 
-            samples.append({
-                "prompt": prompt,
-                "prediction": generated_text[len(prompt):],
-            })
+            samples.append(
+                {
+                    "prompt": prompt,
+                    "prediction": generated_text[len(prompt) :],
+                }
+            )
 
         print("✅ 示例生成完成")
         return samples
@@ -183,7 +191,7 @@ class ModelEvaluator:
             result.perplexity = self.compute_perplexity(eval_dataset)
 
         # 生成示例（用于人工评估）
-        if generate_samples and hasattr(eval_dataset, '__getitem__'):
+        if generate_samples and hasattr(eval_dataset, "__getitem__"):
             # 提取几个示例
             prompts = []
             for i in range(min(num_samples, len(eval_dataset))):
@@ -201,7 +209,7 @@ class ModelEvaluator:
         import json
 
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
-        with open(output_path, 'w', encoding='utf-8') as f:
+        with open(output_path, "w", encoding="utf-8") as f:
             json.dump(result.to_dict(), f, indent=2, ensure_ascii=False)
         print(f"✅ 评估结果已保存到: {output_path}")
 

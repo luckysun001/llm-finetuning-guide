@@ -3,8 +3,8 @@
 支持多种数据集格式和预处理方法
 """
 
-import os
 import json
+import os
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import pandas as pd
@@ -38,7 +38,7 @@ class DatasetLoader:
     def load_from_json(self, filepath: str) -> List[Dict[str, Any]]:
         """从 JSON 文件加载数据"""
         print(f"📄 从 JSON 加载数据: {filepath}")
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(filepath, "r", encoding="utf-8") as f:
             data = json.load(f)
         print(f"✅ 加载了 {len(data)} 条数据")
         return data
@@ -47,7 +47,7 @@ class DatasetLoader:
         """从 JSONL 文件加载数据"""
         print(f"📄 从 JSONL 加载数据: {filepath}")
         data = []
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(filepath, "r", encoding="utf-8") as f:
             for line in f:
                 if line.strip():
                     data.append(json.loads(line))
@@ -230,6 +230,7 @@ class DatasetSplitter:
 # 示例数据集模板
 # ============================================
 
+
 def create_sample_instruction_dataset(
     output_path: str = "datasets/sample_instructions.jsonl",
     num_samples: int = 100,
@@ -254,26 +255,35 @@ def create_sample_instruction_dataset(
     ]
 
     topics = [
-        "机器学习", "深度学习", "神经网络", "自然语言处理",
-        "计算机视觉", "数据科学", "云计算", "人工智能",
-        "大语言模型", "Transformer架构",
+        "机器学习",
+        "深度学习",
+        "神经网络",
+        "自然语言处理",
+        "计算机视觉",
+        "数据科学",
+        "云计算",
+        "人工智能",
+        "大语言模型",
+        "Transformer架构",
     ]
 
     for i in range(num_samples):
         topic = random.choice(topics)
         instruction = random.choice(instructions).format(topic, random.choice(topics))
 
-        samples.append({
-            "instruction": instruction,
-            "input": "",
-            "output": f"这是关于{topic}的示例回答。在实际使用中，这里应该包含高质量的人工标注。",
-        })
+        samples.append(
+            {
+                "instruction": instruction,
+                "input": "",
+                "output": f"这是关于{topic}的示例回答。在实际使用中，这里应该包含高质量的人工标注。",
+            }
+        )
 
     # 保存为 JSONL
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    with open(output_path, 'w', encoding='utf-8') as f:
+    with open(output_path, "w", encoding="utf-8") as f:
         for sample in samples:
-            f.write(json.dumps(sample, ensure_ascii=False) + '\n')
+            f.write(json.dumps(sample, ensure_ascii=False) + "\n")
 
     print(f"✅ 示例数据集已创建: {output_path}")
     print(f"   包含 {num_samples} 条样本（用于演示，实际使用需要真实数据）")

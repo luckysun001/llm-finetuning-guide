@@ -3,9 +3,9 @@
 使用真实的指令数据集进行微调
 """
 
+import json
 import os
 import sys
-import json
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -30,10 +30,26 @@ def create_alpaca_style_dataset(output_path: str, num_samples: int = 200):
 
     # 主题
     topics = [
-        "人工智能", "机器学习", "深度学习", "神经网络", "自然语言处理",
-        "计算机视觉", "大语言模型", "Transformer", "注意力机制", "词嵌入",
-        "梯度下降", "反向传播", "激活函数", "损失函数", "优化器",
-        "正则化", "过拟合", "欠拟合", "特征工程", "数据增强",
+        "人工智能",
+        "机器学习",
+        "深度学习",
+        "神经网络",
+        "自然语言处理",
+        "计算机视觉",
+        "大语言模型",
+        "Transformer",
+        "注意力机制",
+        "词嵌入",
+        "梯度下降",
+        "反向传播",
+        "激活函数",
+        "损失函数",
+        "优化器",
+        "正则化",
+        "过拟合",
+        "欠拟合",
+        "特征工程",
+        "数据增强",
     ]
 
     samples = []
@@ -50,17 +66,19 @@ def create_alpaca_style_dataset(output_path: str, num_samples: int = 200):
         output += "3. 可以从数据中自动学习特征\n\n"
         output += f"在实际应用中，{topic1}被广泛应用于各个领域。"
 
-        samples.append({
-            "instruction": instruction,
-            "input": "",
-            "output": output,
-        })
+        samples.append(
+            {
+                "instruction": instruction,
+                "input": "",
+                "output": output,
+            }
+        )
 
     # 保存
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    with open(output_path, 'w', encoding='utf-8') as f:
+    with open(output_path, "w", encoding="utf-8") as f:
         for sample in samples:
-            f.write(json.dumps(sample, ensure_ascii=False) + '\n')
+            f.write(json.dumps(sample, ensure_ascii=False) + "\n")
 
     print(f"✅ 已创建 {num_samples} 条指令数据: {output_path}")
     return output_path
@@ -72,12 +90,7 @@ def main():
     print("=" * 70)
 
     try:
-        from llm_finetuning import (
-            Config,
-            FinetuningMethod,
-            LoRAConfig,
-            FinetuningEngine,
-        )
+        from llm_finetuning import Config, FinetuningEngine, FinetuningMethod, LoRAConfig
     except ImportError as e:
         print(f"❌ 导入失败: {e}")
         print("请先安装依赖")
@@ -186,7 +199,8 @@ def main():
     print("✅ 完整微调流程准备完成！")
     print("=" * 70)
     print("\n🚀 执行以下代码开始训练：")
-    print("""
+    print(
+        """
     # 开始训练
     engine.train(
         train_dataset,
@@ -200,7 +214,8 @@ def main():
 
     # 合并并保存完整模型
     merged_path = engine.merge_and_save()
-""")
+"""
+    )
     print(f"\n📁 输出目录: {config.training.output_dir}")
     print(f"⚙️  配置文件: {config_path}")
 

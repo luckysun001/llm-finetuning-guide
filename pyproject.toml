@@ -75,5 +75,12 @@ target-version = ["py310", "py311", "py312"]
 [tool.ruff]
 line-length = 100
 target-version = "py310"
-select = ["E", "F", "I", "W", "B"]
-ignore = ["E501"]
+
+[tool.isort]
+profile = "black"
+line_length = 100
+
+
+[tool.ruff.lint]
+select = ["F"]
+ignore = ["F403"]

@@ -2,10 +2,10 @@
 测试数据处理模块
 """
 
-import unittest
-import tempfile
 import json
 import os
+import tempfile
+import unittest
 
 
 class TestDatasetLoader(unittest.TestCase):
@@ -28,7 +28,7 @@ class TestDatasetLoader(unittest.TestCase):
             self.assertTrue(os.path.exists(result_path))
 
             # 验证内容
-            with open(result_path, 'r', encoding='utf-8') as f:
+            with open(result_path, "r", encoding="utf-8") as f:
                 lines = f.readlines()
                 self.assertEqual(len(lines), 10)
 

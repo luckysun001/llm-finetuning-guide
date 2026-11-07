@@ -6,9 +6,9 @@ import os
 from typing import Any, Callable, Dict, List, Optional
 
 from llm_finetuning.config import Config, FinetuningMethod
-from llm_finetuning.methods.lora import LoRAFinetuner, QLoRAFinetuner
-from llm_finetuning.data.processor import DatasetLoader, DataPreprocessor, DatasetSplitter
+from llm_finetuning.data.processor import DataPreprocessor, DatasetLoader, DatasetSplitter
 from llm_finetuning.evaluation.evaluator import ModelEvaluator
+from llm_finetuning.methods.lora import LoRAFinetuner, QLoRAFinetuner
 from llm_finetuning.visualization.plotter import TrainingVisualizer
 
 
@@ -85,17 +85,20 @@ class FinetuningEngine:
         loader = DatasetLoader(self.config.data)
 
         if dataset_path:
-            if dataset_path.endswith('.jsonl'):
+            if dataset_path.endswith(".jsonl"):
                 from datasets import Dataset
+
                 data = loader.load_from_jsonl(dataset_path)
                 dataset = Dataset.from_list(data)
-            elif dataset_path.endswith('.json'):
+            elif dataset_path.endswith(".json"):
                 from datasets import Dataset
+
                 data = loader.load_from_json(dataset_path)
                 dataset = Dataset.from_list(data)
-            elif dataset_path.endswith('.csv'):
+            elif dataset_path.endswith(".csv"):
                 df = loader.load_from_csv(dataset_path)
                 from datasets import Dataset
+
                 dataset = Dataset.from_pandas(df)
             else:
                 raise ValueError(f"不支持的文件格式: {dataset_path}")
@@ -283,7 +286,7 @@ class FinetuningEngine:
         final_metrics = {
             "困惑度 (Perplexity)": eval_result.perplexity,
         }
-        if hasattr(eval_result, 'bleu_score') and eval_result.bleu_score:
+        if hasattr(eval_result, "bleu_score") and eval_result.bleu_score:
             final_metrics["BLEU"] = eval_result.bleu_score
 
         self.visualizer.create_training_report(
@@ -350,6 +353,7 @@ class FinetuningEngine:
 # ============================================
 # 便捷函数
 # ============================================
+
 
 def quick_finetune(
     model_name: str,

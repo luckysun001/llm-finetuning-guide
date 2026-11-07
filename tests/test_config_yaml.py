@@ -3,6 +3,7 @@
 覆盖 training / data / evaluation / lora 四段的加载，
 以及仓库内 configs/ 示例配置的可用性。
 """
+
 import os
 import tempfile
 import unittest
@@ -26,32 +27,38 @@ class TestFromYaml(unittest.TestCase):
         return path
 
     def test_training_and_data_sections(self):
-        path = self._write({
-            "model_name_or_path": "m",
-            "finetuning_method": "lora",
-            "training": {"num_train_epochs": 7, "learning_rate": 1e-4},
-            "data": {"max_seq_length": 1024},
-        })
+        path = self._write(
+            {
+                "model_name_or_path": "m",
+                "finetuning_method": "lora",
+                "training": {"num_train_epochs": 7, "learning_rate": 1e-4},
+                "data": {"max_seq_length": 1024},
+            }
+        )
         cfg = Config.from_yaml(path)
         self.assertEqual(cfg.training.num_train_epochs, 7)
         self.assertEqual(cfg.training.learning_rate, 1e-4)
         self.assertEqual(cfg.data.max_seq_length, 1024)
 
     def test_evaluation_section(self):
-        path = self._write({
-            "model_name_or_path": "m",
-            "evaluation": {"max_new_tokens": 64, "temperature": 0.3},
-        })
+        path = self._write(
+            {
+                "model_name_or_path": "m",
+                "evaluation": {"max_new_tokens": 64, "temperature": 0.3},
+            }
+        )
         cfg = Config.from_yaml(path)
         self.assertEqual(cfg.evaluation.max_new_tokens, 64)
         self.assertEqual(cfg.evaluation.temperature, 0.3)
 
     def test_lora_section(self):
-        path = self._write({
-            "model_name_or_path": "m",
-            "finetuning_method": "qlora",
-            "lora": {"r": 32, "lora_alpha": 64, "target_modules": ["q_proj"]},
-        })
+        path = self._write(
+            {
+                "model_name_or_path": "m",
+                "finetuning_method": "qlora",
+                "lora": {"r": 32, "lora_alpha": 64, "target_modules": ["q_proj"]},
+            }
+        )
         cfg = Config.from_yaml(path)
         self.assertEqual(cfg.lora_config.r, 32)
         self.assertEqual(cfg.lora_config.lora_alpha, 64)
@@ -59,21 +66,25 @@ class TestFromYaml(unittest.TestCase):
 
     def test_lora_section_ignored_for_full_finetuning(self):
         """全参微调没有 lora_config，lora 段应被安全忽略"""
-        path = self._write({
-            "model_name_or_path": "m",
-            "finetuning_method": "full",
-            "lora": {"r": 32},
-        })
+        path = self._write(
+            {
+                "model_name_or_path": "m",
+                "finetuning_method": "full",
+                "lora": {"r": 32},
+            }
+        )
         cfg = Config.from_yaml(path)
         self.assertFalse(hasattr(cfg, "lora_config"))
 
     def test_unknown_keys_are_ignored(self):
         """配置文件里出现未知字段不应报错"""
-        path = self._write({
-            "model_name_or_path": "m",
-            "training": {"not_a_real_field": 1},
-            "unknown_section": {"x": 1},
-        })
+        path = self._write(
+            {
+                "model_name_or_path": "m",
+                "training": {"not_a_real_field": 1},
+                "unknown_section": {"x": 1},
+            }
+        )
         cfg = Config.from_yaml(path)
         self.assertEqual(cfg.model_name_or_path, "m")
 

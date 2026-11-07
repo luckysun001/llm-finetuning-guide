@@ -18,8 +18,8 @@ def main():
     try:
         from llm_finetuning import (
             Config,
-            FinetuningMethod,
             FinetuningEngine,
+            FinetuningMethod,
             create_sample_instruction_dataset,
         )
     except ImportError as e:
@@ -66,6 +66,7 @@ def main():
     # 5. 定义指令分词函数
     def tokenize_instructions(examples):
         from llm_finetuning.data.processor import DataPreprocessor
+
         preprocessor = DataPreprocessor(engine.finetuner.tokenizer, config.data)
         return preprocessor.tokenize_instruction(examples)
 

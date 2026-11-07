@@ -110,9 +110,7 @@ def _require(module: str, extra: str):
     try:
         return importlib.import_module(module)
     except ImportError as exc:
-        raise ImportError(
-            f"导出需要 `{module}`，请先安装：pip install {extra}"
-        ) from exc
+        raise ImportError(f"导出需要 `{module}`，请先安装：pip install {extra}") from exc
 
 
 class ModelExporter:
@@ -152,15 +150,11 @@ class ModelExporter:
     # ------------------------------------------------------------------
     # 各格式实现
     # ------------------------------------------------------------------
-    def _export_safetensors(
-        self, model: Any, tokenizer: Any, output_dir: Path
-    ) -> ExportResult:
+    def _export_safetensors(self, model: Any, tokenizer: Any, output_dir: Path) -> ExportResult:
         """导出 HF 标准权重目录（safetensors + config + tokenizer）"""
         self._apply_quantization(model)
 
-        model.save_pretrained(
-            str(output_dir), safe_serialization=True, max_shard_size="5GB"
-        )
+        model.save_pretrained(str(output_dir), safe_serialization=True, max_shard_size="5GB")
         files = self._list_files(output_dir)
 
         if tokenizer is not None and self.config.save_tokenizer:
@@ -278,18 +272,16 @@ class ModelExporter:
         except (ValueError, KeyError) as exc:
             raise ValueError(f"不支持的量化级别: {quantization}") from exc
 
-        return num_params * bytes_per_param / (1024 ** 2)
+        return num_params * bytes_per_param / (1024**2)
 
     @staticmethod
     def _list_files(directory: Path) -> List[str]:
-        return sorted(
-            str(p.relative_to(directory)) for p in directory.rglob("*") if p.is_file()
-        )
+        return sorted(str(p.relative_to(directory)) for p in directory.rglob("*") if p.is_file())
 
     @staticmethod
     def _dir_size_mb(directory: Path) -> float:
         total = sum(p.stat().st_size for p in directory.rglob("*") if p.is_file())
-        return total / (1024 ** 2)
+        return total / (1024**2)
 
 
 def fingerprint_directory(directory: str) -> str:
